@@ -1,0 +1,196 @@
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title></title>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <!-- unpkg : use the latest version of Video.js -->
+  <link href="http://videojs.github.io/font/css/videojs-icons.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+    integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <link href="https://vjs.zencdn.net/5.16/video-js.min.css" rel="stylesheet" />
+  <script src="https://vjs.zencdn.net/5.16/video.js"></script>
+  <script src="https://cdn.rawgit.com/videojs/videojs-youtube/master/src/Youtube.js"></script>
+  <script src="https://rawgit.com/atlance01/vrapp-ionic/master/www/js/lib/videojs-playlist.js"></script>
+
+  <style type="text/css" media="all" id="my"></style>
+</head>
+
+<body cz-shortcut-listen="true">
+
+  <div class="container">
+
+    <video class="video-js vjs-default-skin vjs-fluid" controls width="640px" height="360px"
+      data-setup='{ "techOrder": ["html5", "youtube"] }'>
+    </video>
+    <button class="play btn btn-primary" onclick="play()"> Iniciar</button>
+    <button class="previous btn btn-primary" style="display: none"> Voltar</button>
+    <button class="next btn btn-primary" style="display: none;"> Avançar</button>
+    <button class="update btn btn-primary" onclick="changeModeVideos()"> Alterar Modo de Visualização</button>
+  </div>
+
+  <script>
+    configs = {
+      'config': {
+        'mode': 'CONCATENADO',
+        'hasButtons': false
+      }
+    }
+
+    function play()
+    {
+      changeModeVideos();
+      var player = videojs(document.querySelector("video"), {});
+      player.play();
+      $('.play').html('Parar');
+      $(".play").css("display","none");
+    }
+
+    function updatePlayer(videos) {
+      var myvid = document.getElementById('myvideo');
+
+      var myvids = videos;
+      var activeVideo = 0;
+      var player = videojs(document.querySelector("video"), {});
+      try {
+        // try on ios
+        player.volume(1);
+        // player.play();
+      } catch (e) { }
+      //player.playlist(videoList;
+
+      player.playlist(myvids);
+
+      if (!this.configs['config']['hasButtons']) {
+        document.querySelector(".previous").addEventListener("click", function () {
+          player.playlist.previous();
+        });
+        document.querySelector(".next").addEventListener("click", function () {
+          player.playlist.next();
+        });
+        /*document.querySelector(".jump").addEventListener("click", function () {
+          player.playlist.currentItem(2); // play third
+          player.play();
+        });/*
+  
+        /* ADD PREVIOUS */
+        var Button = videojs.getComponent("Button");
+
+        // Extend default
+        var PrevButton = videojs.extend(Button, {
+          //constructor: function(player, options) {
+          constructor: function () {
+            Button.apply(this, arguments);
+            /* NEW VIDEOJS ICON PREV NEXT */
+            this.addClass("vjs-icon-previous-item");
+            this.controlText("Previous");
+
+          },
+          handleClick: function () {
+            player.playlist.previous();
+          }
+        });
+
+        /* ADD BUTTON */
+        //var Button = videojs.getComponent('Button');
+
+        // Extend default
+        var NextButton = videojs.extend(Button, {
+          //constructor: function(player, options) {
+          constructor: function () {
+            Button.apply(this, arguments);
+            /* NEW VIDEOJS ICON PREV NEXT */
+            this.addClass("vjs-icon-next-item");
+            this.controlText("Next");
+          },
+
+          handleClick: function () {
+            player.playlist.next();
+          }
+        });
+
+        // Register the new component
+        videojs.registerComponent("NextButton", NextButton);
+        videojs.registerComponent("PrevButton", PrevButton);
+        //player.getChild('controlBar').addChild('SharingButton', {});
+        player.getChild("controlBar").addChild("PrevButton", {}, 0);
+        player.getChild("controlBar").addChild("NextButton", {}, 2);
+
+        this.configs['config']['hasButtons'] = true;
+      }
+    }
+
+    function changeModeVideos() {
+      this.configs['config']['mode'] = (this.configs['config']['mode'] == 'CONCATENADO')?
+      this.configs['config']['mode'] = 'NORMAL':this.configs['config']['mode'] = 'CONCATENADO';
+      var config = this.configs;
+      $.ajax({
+        url: "config.php",
+        type: "post",
+        data: config,
+        success: function (data) {
+          var result = JSON.parse(data);
+          updatePlayer(result['videos']);
+        }
+      });
+    }
+
+
+  </script>
+
+  <style>
+    /* GC STYLE MODIF */
+    .vjs-control-bar {
+      font-size: 14px;
+    }
+
+    .video-js .vjs-control {
+      width: 3em !important;
+    }
+
+    /* GC STYLE MODIF END */
+    .video-holder,
+    .video-holder * {
+      box-sizing: border-box !important
+    }
+
+    .video-holder {
+      background: #1b1b1b;
+      padding: 10px
+    }
+
+    .centered {
+      width: 100%
+    }
+
+    #video {
+      border-radius: 8px
+    }
+
+    .video-holder .vjs-big-play-button {
+      left: 50%;
+      width: 100px;
+      margin-left: -50px;
+      height: 80px;
+      top: 50%;
+      margin-top: -40px
+    }
+
+    /* .video-js .icon-angle-right, .video-js .icon-angle-left { /* FONT AWESOME ICONS */
+    .video-js .vjs-icon-previous-item,
+    .video-js .vjs-icon-next-item {
+      /* VIDEOJS ICONS */
+      cursor: pointer;
+      -webkit-box-flex: none;
+      -moz-box-flex: none;
+      -webkit-flex: none;
+      -ms-flex: none;
+      flex: none;
+      /*     font-size: 8px;
+    margin-top: 3px !important; */
+    }
+  </style>
+</body>
+<evlist></evlist>
+
+</html>
